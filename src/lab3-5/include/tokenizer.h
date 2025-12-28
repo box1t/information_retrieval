@@ -4,40 +4,28 @@
 #include <cstring>
 #include <ctime>
 #include <cctype>
+#include <libstemmer.h>
+#include <string>
+#include <vector>
+
+class CustomIndexer;
 
 struct TokenStats {
     size_t total_tokens;
     size_t total_chars;
     double duration;
-    double speed_kb_per_sec;
 };
 
 bool is_separator(const char* str, size_t i, size_t len) {
     unsigned char c = (unsigned char)str[i];
-
-    // 1. Стандартные пробельные символы и управляющие символы ASCII
     if (c <= 32) return true;
-
-    // 2. Расширенный список пунктуации (добавлены слеши, скобки, мат. знаки)
-    // Эти символы ВСЕГДА разделяют слова
     if (strchr(",!?()\":;[]{}<>\\/|*+=%^$#@~`", c)) return true;
-
-    // 3. Обработка точки (сложный случай)
     if (c == '.') {
-        // Не разделитель, если это число (например, 3.14)
-        if (i > 0 && i < len - 1 && isdigit((unsigned char)str[i-1]) && isdigit((unsigned char)str[i+1])) {
-            return false; 
-        }
-        // Не разделитель, если это инициал (например, И. Иванов — работает для ASCII)
-        if (i > 0 && isupper((unsigned char)str[i-1])) {
-            return false;
-        }
+        if (i > 0 && i < len - 1 && isdigit((unsigned char)str[i-1]) && isdigit((unsigned char)str[i+1])) return false;
+        if (i > 0 && isupper((unsigned char)str[i-1])) return false;
         return true;
     }
-
-    // 4. Обработка дефиса
     if (c == '-') {
-        // Не разделитель, если стоит внутри слова (сине-зеленый) или внутри числа
         if (i > 0 && i < len - 1) {
             unsigned char prev = (unsigned char)str[i-1];
             unsigned char next = (unsigned char)str[i+1];
@@ -45,40 +33,51 @@ bool is_separator(const char* str, size_t i, size_t len) {
         }
         return true;
     }
-
-    // 5. Обработка апострофа (например, it's или don't)
     if (c == '\'') {
-        if (i > 0 && i < len - 1 && isalpha((unsigned char)str[i-1]) && isalpha((unsigned char)str[i+1])) {
-            return false;
-        }
+        if (i > 0 && i < len - 1 && isalpha((unsigned char)str[i-1]) && isalpha((unsigned char)str[i+1])) return false;
         return true;
     }
-
     return false;
 }
 
-TokenStats tokenize_and_analyze(const char* source) {
-    size_t src_len = strlen(source);
+TokenStats tokenize_and_analyze(const char* html_content, CustomIndexer& indexer, uint32_t doc_id) {
+    size_t src_len = strlen(html_content);
     char* buffer = new char[src_len + 1];
     size_t b_idx = 0;
     bool in_tag = false;
     
-    TokenStats stats = {0, 0, 0.0, 0.0};
+    TokenStats stats = {0, 0, 0.0};
     clock_t start = clock();
 
-    for (size_t i = 0; i < src_len; ++i) {
-        char c = source[i];
+    sb_stemmer* stemmer_ru = sb_stemmer_new("russian", "UTF_8");
+    sb_stemmer* stemmer_en = sb_stemmer_new("english", "UTF_8");
 
-        // Пропуск HTML тегов
+    for (size_t i = 0; i < src_len; ++i) {
+        char c = html_content[i];
+
         if (c == '<') { in_tag = true; continue; }
         if (c == '>') { in_tag = false; continue; }
         if (in_tag) continue;
 
-        if (is_separator(source, i, src_len)) {
+        if (is_separator(html_content, i, src_len)) {
             if (b_idx > 0) {
                 buffer[b_idx] = '\0';
+                
+                const sb_symbol* stemmed;
+                bool has_cyrillic = false;
+                for(size_t j=0; j<b_idx; ++j) {
+                    if((unsigned char)buffer[j] > 127) { has_cyrillic = true; break; }
+                }
+
+                if (has_cyrillic) {
+                    stemmed = sb_stemmer_stem(stemmer_ru, (unsigned char*)buffer, b_idx);
+                } else {
+                    stemmed = sb_stemmer_stem(stemmer_en, (unsigned char*)buffer, b_idx);
+                }
+
                 stats.total_tokens++;
-                stats.total_chars += b_idx;
+                stats.total_chars += strlen((const char*)stemmed);
+                
                 b_idx = 0;
             }
         } else {
@@ -86,15 +85,18 @@ TokenStats tokenize_and_analyze(const char* source) {
         }
     }
 
-    // Обработка последнего токена
     if (b_idx > 0) {
+        buffer[b_idx] = '\0';
+        const sb_symbol* stemmed = sb_stemmer_stem(stemmer_en, (unsigned char*)buffer, b_idx);
         stats.total_tokens++;
-        stats.total_chars += b_idx;
+        stats.total_chars += strlen((const char*)stemmed);
     }
 
     clock_t end = clock();
     stats.duration = (double)(end - start) / CLOCKS_PER_SEC;
 
+    sb_stemmer_delete(stemmer_ru);
+    sb_stemmer_delete(stemmer_en);
     delete[] buffer;
     return stats;
 }

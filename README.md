@@ -1,49 +1,5 @@
 # Информационный поиск
 
-## Состав репозитория
-
-
-| Модули репозитория | Краткое описание |
-| :------------------------------------ | :------------------------------------ |
-| lab1 | Добыча корпуса документов |
-| lab2 | Поисковый робот |
-| lab3-5 | Токенизация, Закон Ципфа, Стемминг |
-| lab6 | Оценка качества поиска |
-| lab7 | Булев индекс |
-
-
-
-```
-information_retrieval/
-├── src/
-│   ├── lab1/                               
-│   │   └── analyze_wiki_dump.py            #
-│   ├── lab2/                               
-│   │   ├── config.yaml                      
-│   │   ├── check_db.py                     # 
-│   │   └── crawler.py                      # 
-│   ├── lab3-5/                             
-│   │   ├── 
-│   │   ├──                     
-│   │   ├── 
-│   │   ├── 
-│   │   └──  
-│   ├── lab6/                               
-│   │   ├──                                 #
-│   │   ├──                                 #
-│   │   └──                                 #
-│   └── lab7/
-│       ├──                                 #
-│       ├──                                 #
-│       └──                                 #
-├── reports/
-│   ├── report.pdf
-│   └── report.tex
-├── docker-compose.yml                      # Основной docker-compose файл
-└── requirements.txt
-```
-
-
 ## Реализованные возможности функционирования
 
 | Модули репозитория | Краткое описание |
@@ -51,12 +7,33 @@ information_retrieval/
 | lab1 | Добыча корпуса документов |
 | lab2 | Поисковый робот |
 | lab3-5 | Токенизация, Закон Ципфа, Стемминг |
-| lab6 | Оценка качества поиска |
 | lab7 | Булев индекс |
+| lab8 | Булев поиск |
 
 
-- [x]
-- [ ]
-- [ ]
-- [ ]
-- [ ]
+```
+information_retrieval/
+├── src/
+│   ├── lab1/
+│   │   └── analyze_wiki_dump.py
+│   ├── lab2/
+│   │   ├── config.yaml
+│   │   ├── check_db.py 
+│   │   └── crawler.py 
+│   └── lab3-8/
+│       ├── plots/
+│       │   ├── zypf_law.py
+│       │   └── zipf_law_analysis.png
+│       ├── include/
+│       │   ├── bool_index.h
+│       │   ├── bool_search.h
+│       │   └── tokenizer.h
+│       └── src/
+│           └── main.cpp
+│
+├── reports/
+│   ├── report.pdf
+│   └── report.tex
+├── docker-compose.yml
+└── requirements.txt
+```

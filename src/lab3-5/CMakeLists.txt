@@ -13,10 +13,12 @@ include_directories(${MONGOCXX_INCLUDE_DIRS} ${BSONCXX_INCLUDE_DIRS})
 
 add_executable(tokenizer_lab 
     src/main.cpp
+    src/indexer.cpp
 )
 
 target_link_libraries(tokenizer_lab 
     PRIVATE 
     mongo::mongocxx_shared 
     mongo::bsoncxx_shared
+    stemmer
 )

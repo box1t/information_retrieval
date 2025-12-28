@@ -10,20 +10,16 @@ def analyze_wiki_dump(file_path):
     context = ET.iterparse(file_path, events=('end',))
     
     for event, elem in context:
-        # Убираем пространство имен из тега (всё, что в фигурных скобках)
         tag = elem.tag.split('}')[-1]
         
         if tag == 'page':
             count += 1
-            # Проходим по вложенным элементам 'page', чтобы найти тег 'text' 
             for child in elem.iter():
                 child_tag = child.tag.split('}')[-1]
                 if child_tag == 'text':
                     if child.text:
                         total_text_length += len(child.text)
-                    break # Текст найден, выходим из внутреннего цикла
-            
-            # Очищаем память
+                    break 
             elem.clear()
             
             if count % 5000 == 0:

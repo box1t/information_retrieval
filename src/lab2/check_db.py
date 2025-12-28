@@ -7,7 +7,6 @@ from datetime import datetime
 load_dotenv()
 
 def check_results():
-    # Подключение (используем обычный MongoClient для простого скрипта)
     user = os.getenv('MONGO_USER')
     password = os.getenv('MONGO_PASS')
     uri = f"mongodb://{user}:{password}@localhost:27017/"
@@ -24,7 +23,6 @@ def check_results():
         print("База пуста!")
         return
 
-    # Берем последние 3 документа
     cursor = collection.find().sort("timestamp", -1).limit(3)
 
     for i, doc in enumerate(cursor):
@@ -32,12 +30,10 @@ def check_results():
         print(f"URL:    {doc.get('url')}")
         print(f"Source: {doc.get('name')}")
         
-        # Проверка Unix Timestamp
         ts = doc.get('timestamp')
         readable_date = datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-        print(f"Time:   {ts} (Человекочитаемая дата: {readable_date})")
+        print(f"Time:   {ts} (дата: {readable_date})")
         
-        # Проверка HTML
         html = doc.get('html', '')
         html_snippet = html[:100].replace('\n', ' ')
         print(f"HTML:   {html_snippet}...")

@@ -4,7 +4,6 @@ import pymongo
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-# Используем неинтерактивный бэкэнд для сохранения в файл без вывода окна
 matplotlib.use('Agg') 
 
 from collections import Counter
@@ -25,7 +24,6 @@ CONFIG = {
     }
 }
 
-# --- СЛОЙ ДАННЫХ ---
 def get_mongo_data():
     user = os.getenv('MONGO_USER')
     password = os.getenv('MONGO_PASS')
@@ -36,7 +34,6 @@ def get_mongo_data():
     db = client[db_name]
     return db[CONFIG['db']['collection']].find({}, {"html": 1})
 
-# --- СЛОЙ ЛОГИКИ ---
 def tokenize(html_content):
     clean_text = re.sub(r'<[^>]+>', ' ', html_content)
     return re.findall(r'\w+', clean_text.lower())
@@ -58,7 +55,6 @@ def get_theoretical_values(ranks, max_freq):
     mandelbrot = [p / (r + b)**g for r in ranks]
     return zipf, mandelbrot
 
-# --- СЛОЙ ПРЕДСТАВЛЕНИЯ (СОХРАНЕНИЕ) ---
 def save_plot(ranks, freqs, zipf, mandelbrot):
     plt.figure(figsize=(10, 6))
     
@@ -74,15 +70,13 @@ def save_plot(ranks, freqs, zipf, mandelbrot):
     plt.legend()
     plt.grid(True, which="both", ls="-", alpha=0.2)
 
-    # Логика сохранения в директорию
     os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
     graph_filepath = os.path.join(OUTPUT_DIRECTORY, FILENAME)
     
     plt.savefig(graph_filepath, dpi=300, bbox_inches='tight')
-    plt.close() # Освобождаем память
+    plt.close()
     print(f"\nГрафик успешно сохранен: {graph_filepath}")
 
-# --- ТОЧКА ВХОДА ---
 if __name__ == "__main__":
     try:
         print("1. Подключение к MongoDB...")
