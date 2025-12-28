@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: search_engine_db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    env_file:
+      - .env
+    environment:
+      # Эти переменные Mongo подхватит из .env, если названия совпадут
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS}
+      - MONGO_INITDB_DATABASE=${MONGO_DB}
+    networks:
+      - search_net
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: search_engine_gui
+    restart: always
+    depends_on:
+      - mongodb
+    ports:
+      - "8087:8081"
+    env_file:
+      - .env
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_USER}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_PASS}
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_USER}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_PASS}
+    networks:
+      - search_net
+
+networks:
+  search_net:
+    driver: bridge
+
+volumes:
+  mongo_data:
