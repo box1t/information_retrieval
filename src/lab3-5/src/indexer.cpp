@@ -8,15 +8,26 @@ CustomIndexer::CustomIndexer() : forward_size(0), forward_capacity(10), total_un
 }
 
 CustomIndexer::~CustomIndexer() {
-    // Очистка хеш-таблицы
     for (size_t i = 0; i < HASH_SIZE; ++i) {
         DictNode* current = table[i];
         while (current != nullptr) {
             DictNode* next = current->next;
-            delete current; // Вызовется ~DictNode(), который удалит term и IntArray
+            delete current;
             current = next;
         }
     }
+}
+
+void CustomIndexer::add_term_with_offset(const char* term, uint64_t offset, uint32_t df) {
+    size_t idx = hash_func(term);
+    
+    DictNode* newNode = new DictNode(term);
+    
+    newNode->file_offset = offset;
+    newNode->doc_freq = df;
+    
+    newNode->next = table[idx];
+    table[idx] = newNode;
 }
 
 size_t CustomIndexer::hash_func(const char* str) {
@@ -89,4 +100,73 @@ void CustomIndexer::save_forward_index(const char* path, uint32_t id, const char
     f_out.write(title, t_len);
     f_out.write(reinterpret_cast<const char*>(&u_len), sizeof(uint32_t));
     f_out.write(url, u_len);
+}
+
+void CustomIndexer::load_from_file(const char* d_path, const char* p_path) {
+    std::ifstream d_in(d_path, std::ios::binary);
+    if (!d_in) {
+        std::cerr << "Ошибка: Не удалось открыть " << d_path << std::endl;
+        return;
+    }
+
+    strncpy(this->postings_file_path, p_path, 255);
+    this->postings_file_path[255] = '\0';
+
+    uint32_t magic = 0, count = 0;
+    d_in.read((char*)&magic, sizeof(uint32_t));
+    d_in.read((char*)&count, sizeof(uint32_t));
+
+    if (count > 1000000) { 
+        return;
+    }
+
+    for (uint32_t i = 0; i < count; ++i) {
+        uint16_t t_len = 0;
+        if (!d_in.read((char*)&t_len, sizeof(uint16_t))) break;
+
+        char term_buf[512]; 
+        if (t_len >= 512) {
+            d_in.seekg(t_len, std::ios::cur);
+            d_in.seekg(sizeof(uint64_t) + sizeof(uint32_t), std::ios::cur);
+            continue;
+        }
+
+        d_in.read(term_buf, t_len);
+        term_buf[t_len] = '\0';
+
+        uint64_t offset;
+        uint32_t df;
+        d_in.read((char*)&offset, sizeof(uint64_t));
+        d_in.read((char*)&df, sizeof(uint32_t));
+
+        add_term_with_offset(term_buf, offset, df);
+    }
+}
+
+DictNode* CustomIndexer::find_node(const char* term) {
+    size_t idx = hash_func(term);
+    DictNode* curr = table[idx];
+    while (curr) {
+        if (strcmp(curr->term, term) == 0) return curr;
+        curr = curr->next;
+    }
+    return nullptr;
+}
+
+IntArray* CustomIndexer::get_postings(const char* term) {
+    DictNode* node = find_node(term);
+    if (!node) return new IntArray(); 
+
+    IntArray* res = new IntArray();
+    std::ifstream p_in(this->postings_file_path, std::ios::binary);
+    if (!p_in) return res;
+
+    p_in.seekg(node->file_offset);
+    
+    for (uint32_t i = 0; i < node->doc_freq; ++i) {
+        uint32_t id;
+        p_in.read((char*)&id, sizeof(uint32_t));
+        res->push_back(id);
+    }
+    return res;
 }

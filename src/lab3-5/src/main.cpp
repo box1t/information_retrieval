@@ -10,6 +10,7 @@
 
 int main() {
     CustomIndexer indexer; 
+    
     try {
         mongocxx::instance instance{}; 
 

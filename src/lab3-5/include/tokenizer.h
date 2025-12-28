@@ -16,7 +16,7 @@ struct TokenStats {
     double duration;
 };
 
-bool is_separator(const char* str, size_t i, size_t len) {
+inline bool is_separator(const char* str, size_t i, size_t len) {
     unsigned char c = (unsigned char)str[i];
     if (c <= 32) return true;
     if (strchr(",!?()\":;[]{}<>\\/|*+=%^$#@~`", c)) return true;
@@ -40,7 +40,7 @@ bool is_separator(const char* str, size_t i, size_t len) {
     return false;
 }
 
-TokenStats tokenize_and_analyze(const char* html_content, CustomIndexer& indexer, uint32_t doc_id) {
+inline TokenStats tokenize_and_analyze(const char* html_content, CustomIndexer& indexer, uint32_t doc_id) {
     size_t src_len = strlen(html_content);
     char* buffer = new char[src_len + 1];
     size_t b_idx = 0;

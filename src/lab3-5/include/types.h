@@ -37,7 +37,9 @@ struct DictNode {
     char* term;
     IntArray* doc_ids;
     DictNode* next;
-
+    uint64_t file_offset = 0; // Смещение в postings.bin
+    uint32_t doc_freq = 0;
+    
     DictNode(const char* t) {
         term = new char[std::strlen(t) + 1];
         std::strcpy(term, t);

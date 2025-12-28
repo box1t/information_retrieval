@@ -34,6 +34,14 @@ public:
     void add_term(const char* term, uint32_t doc_id);
     void save_to_file(const char* dict_path, const char* post_path);
     void save_forward_index(const char* path, uint32_t doc_id, const char* title, const char* url);
+    void load_from_file(const char* d_path, const char* p_path);
+    void add_term_with_offset(const char* term, uint64_t offset, uint32_t df);
+
+    IntArray* get_postings(const char* term);
+    DictNode* find_node(const char* term);
+    char postings_file_path[256];
+
 };
+
 
 #endif
