@@ -33,6 +33,7 @@ public:
     void add_document(uint32_t id, const char* title, const char* url, const char** tokens, size_t token_count);    
     void add_term(const char* term, uint32_t doc_id);
     void save_to_file(const char* dict_path, const char* post_path);
+    void save_forward_index(const char* path, uint32_t doc_id, const char* title, const char* url);
 };
 
 #endif

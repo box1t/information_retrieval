@@ -25,10 +25,11 @@ information_retrieval/
 │       │   ├── zypf_law.py
 │       │   └── zipf_law_analysis.png
 │       ├── include/
-│       │   ├── bool_index.h
-│       │   ├── bool_search.h
+│       │   ├── indexer.h
+│       │   ├── types.h
 │       │   └── tokenizer.h
 │       └── src/
+│           ├── indexer.cpp
 │           └── main.cpp
 │
 ├── reports/

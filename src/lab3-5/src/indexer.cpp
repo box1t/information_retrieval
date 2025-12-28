@@ -76,3 +76,17 @@ void CustomIndexer::save_to_file(const char* dict_path, const char* post_path) {
         }
     }
 }
+
+void CustomIndexer::save_forward_index(const char* path, uint32_t id, const char* title, const char* url) {
+    std::ofstream f_out(path, std::ios::binary | std::ios::app);
+    if (!f_out.is_open()) return;
+
+    uint32_t t_len = static_cast<uint32_t>(strlen(title));
+    uint32_t u_len = static_cast<uint32_t>(strlen(url));
+
+    f_out.write(reinterpret_cast<const char*>(&id), sizeof(uint32_t));
+    f_out.write(reinterpret_cast<const char*>(&t_len), sizeof(uint32_t));
+    f_out.write(title, t_len);
+    f_out.write(reinterpret_cast<const char*>(&u_len), sizeof(uint32_t));
+    f_out.write(url, u_len);
+}
