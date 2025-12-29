@@ -30,14 +30,15 @@ information_retrieval/
 │       │   ├── types.h
 │       │   └── tokenizer.h
 │       └── src/
+│           ├── web/
 │           ├── indexer.cpp
 │           ├── cli.cpp
 │           ├── search.cpp
 │           └── main.cpp
 │
 ├── reports/
-│   ├── report.pdf
-│   └── report.tex
+│   └──  report.pdf
+│   
 ├── docker-compose.yml
 └── requirements.txt
 ```
