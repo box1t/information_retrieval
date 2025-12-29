@@ -22,22 +22,23 @@
 
 ## ЛР-8. Булев поиск.
 
-
+Проверка запросов:
+```sh
+./search_cli queries.txt
+```
 
 ## Сборка проекта (начало в корневой папке)
 
 
 ```sh
-cd src/lab3-5/
+cd src/lab3-5/build
 
 
 mkdir build
 cmake ..
 cmake --build .
-export $(grep -v '^#' .env | xargs) && ./tokenizer_lab
 
-./search_cli queries.txt
+export $(grep -v '^#' .env | xargs) && ./tokenizer_lab
 
 rm -rf build
 ```
-cd build

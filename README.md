@@ -26,10 +26,13 @@ information_retrieval/
 │       │   └── zipf_law_analysis.png
 │       ├── include/
 │       │   ├── indexer.h
+│       │   ├── search.h
 │       │   ├── types.h
 │       │   └── tokenizer.h
 │       └── src/
 │           ├── indexer.cpp
+│           ├── cli.cpp
+│           ├── search.cpp
 │           └── main.cpp
 │
 ├── reports/

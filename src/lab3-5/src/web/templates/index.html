@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поисковая система - MAI IR Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        mark {
+            background-color: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a, .pagination span {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 0 4px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            color: #333;
+        }
+        .pagination a:hover {
+            background-color: #f0f0f0;
+        }
+        .pagination .current {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .pagination .disabled {
+            color: #999;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Система информационного поиска</h1>
+            <p class="subtitle">MAI-IR Project, Осень 2025</p>
+        </header>
+
+        <main>
+            <form action="/search" method="POST" class="search-form">
+                <div class="search-box">
+                    <input type="text" name="query" id="query" 
+                           value="{{ query if query else '' }}" 
+                           placeholder="Введите поисковый запрос (например: machine AND learning OR neural)"
+                           required autofocus>
+                    <button type="submit">Найти</button>
+                </div>
+                <div class="search-help">
+                    <p>Поддерживаемые операторы: <strong>AND</strong>, <strong>OR</strong>, <strong>NOT</strong></p>
+                    <p>Примеры: <code>machine learning</code>, <code>neural AND network</code>, <code>deep OR shallow</code></p>
+                </div>
+            </form>
+
+            {% if error %}
+            <div class="error-message">
+                <p><strong>Ошибка:</strong> {{ error }}</p>
+            </div>
+            {% endif %}
+
+            {% if query and count is defined %}
+            <div class="results-header">
+                <h2>Результаты поиска: "{{ query }}"</h2>
+                <p class="results-count">
+                    Найдено документов: <strong>{{ count }}</strong>
+                    {% if total_pages > 1 %}
+                    | Страница {{ page }} из {{ total_pages }}
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if documents %}
+            <div class="results-list">
+                {% for doc in documents %}
+                <div class="result-item">
+                    <h3 class="result-title">
+                        {% if doc.url %}
+                        <a href="{{ doc.url }}" target="_blank">{{ doc.title }}</a>
+                        {% else %}
+                        {{ doc.title }}
+                        {% endif %}
+                    </h3>
+                    <p class="result-meta">
+                        ID документа: <strong>{{ doc.id }}</strong>
+                        {% if doc.word_count %}
+                        | Слов: {{ doc.word_count }}
+                        {% endif %}
+                    </p>
+                    {% if doc.preview %}
+                    <div class="result-preview">
+                        {{ doc.preview|safe }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if has_prev %}
+                <a href="/search?q={{ query }}&page={{ page - 1 }}">« Предыдущая</a>
+                {% else %}
+                <span class="disabled">« Предыдущая</span>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                    <span class="current">{{ p }}</span>
+                    {% elif p <= 3 or p > total_pages - 3 or (p >= page - 1 and p <= page + 1) %}
+                    <a href="/search?q={{ query }}&page={{ p }}">{{ p }}</a>
+                    {% elif p == 4 or p == total_pages - 3 %}
+                    <span>...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if has_next %}
+                <a href="/search?q={{ query }}&page={{ page + 1 }}">Следующая »</a>
+                {% else %}
+                <span class="disabled">Следующая »</span>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="no-results">
+                <p>Документы не найдены. Попробуйте изменить запрос.</p>
+            </div>
+            {% endif %}
+            {% endif %}
+        </main>
+
+        <footer>
+            <p>Лабораторные работы: 3,4,5,7,8</p>
+        </footer>
+    </div>
+</body>
+</html>
